@@ -59,7 +59,14 @@ Write-Host \"##vso[build.updatebuildnumber]$version\""
     inlineScript: "$files = Get-ChildItem \"$($ENV:BUILD_SOURCESDIRECTORY)\\Activities\\*.nuspec\" -Recurse | foreach {$_.Name -replace '.nuspec','.csproj'} \n
     $pattern = '' \n
     ForEach($file in $files) { $pattern+=\"**\\$file;\" } \n
-   Write-Host \"##vso[task.setvariable variable=PackagesToPack;]$pattern\" "
+   Write-Host \"##vso[task.setvariable variable=PackagesToPack;]$pattern\" \n
+   [System.IO.File]::WriteAllText(\"$($ENV:BUILD_SOURCESDIRECTORY)\\Activities\\PackagesToPack.txt\", $pattern) "
+
+- task: PublishBuildArtifacts@1
+  displayName: "Publish PackagesToPack"
+  inputs:
+    PathtoPublish: '$(Build.SourcesDirectory)/Activities/PackagesToPack.txt'
+    ArtifactName: 'PackagesToPack'
 
 - task: NuGetCommand@2
   displayName: "Create Nuget packages"
